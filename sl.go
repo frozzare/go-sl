@@ -42,7 +42,8 @@ type Client struct {
 	common service
 
 	// Services used for talking to different parts of the SL API.
-	Realtime *RealtimeService
+	Realtime      *RealtimeService
+	TravelPlanner *TravelPlannerService
 }
 
 type service struct {
@@ -63,6 +64,7 @@ func NewClient(httpClient *http.Client) *Client {
 	c := &Client{client: httpClient, BaseURL: baseURL, UserAgent: userAgent}
 	c.common.client = c
 	c.Realtime = (*RealtimeService)(&c.common)
+	c.TravelPlanner = (*TravelPlannerService)(&c.common)
 
 	return c
 }

@@ -11,6 +11,7 @@ $ go get -u github.com/frozzare/go-sl
 ## APIs that are implemented
 
 * [Realtime V4](https://www.trafiklab.se/api/sl-realtidsinformation-4)
+* [Travelplanner V3](https://www.trafiklab.se/api/sl-reseplanerare-3) (Only Trip at the moment)
 
 ## Example
 

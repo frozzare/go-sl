@@ -3,7 +3,6 @@ package sl
 import (
 	"context"
 	"errors"
-	"reflect"
 )
 
 // realtimeEndpoint is the endpoint to the realtime api.
@@ -61,42 +60,42 @@ type RealtimeResponse struct {
 	Trams  []*Transport `json:"Trams"`
 }
 
-// ResponseData represents the response data SL API.
-type ResponseData struct {
+// RealtimeResponseData represents the realtime response data SL API.
+type RealtimeResponseData struct {
 	ExecutionTime int               `json:"ExecutionTime"`
-	Message       interface{}       `json:"Message"`
+	Message       string            `json:"Message"`
 	ResponseData  *RealtimeResponse `json:"ResponseData"`
 	StatusCode    int               `json:"StatusCode"`
 }
 
-// RealtimeSearchOptions specifies optional parameters to the RealtimeService.Search
+// RealtimeSearchOptions specifies optional parameters to the RealtimeService.Search.
 type RealtimeSearchOptions struct {
 	// Exclude buses if true. Default is false that are reversed to true.
-	Bus bool
+	Bus bool `url:"bus,omitempty"`
 
 	// Exclude metros if true. Default is false that are reversed to true.
-	Metro bool
+	Metro bool `url:"metro,omitempty"`
 
 	// API Key.
-	Key string
+	Key string `url:"key,omitempty"`
 
 	// Station ID.
-	SiteID string
+	SiteID string `url:"siteId,omitempty"`
 
 	// Exclude ships if true. Default is false that are reversed to true.
-	Ship bool
+	Ship bool `url:"ship,omitempty"`
 
 	// Exclude train if true. Default is false that are reversed to true.
-	Train bool
+	Train bool `url:"train,omitempty"`
 
 	// Exclude trams if true. Default is false that are reversed to true.
-	Tram bool
+	Tram bool `url:"tram,omitempty"`
 
 	// Time window to search departures within. Max 60 minutes.
-	TimeWindow int
+	TimeWindow int `url:"timeWindow,omitempty"`
 }
 
-// Search does a realtime search.
+// Search does a realtime search and response with the realtime list or a error.
 func (s *RealtimeService) Search(ctx context.Context, opt *RealtimeSearchOptions) (*RealtimeResponse, error) {
 	// Reverse transport options.
 	opt.Bus = !opt.Bus
@@ -123,13 +122,13 @@ func (s *RealtimeService) Search(ctx context.Context, opt *RealtimeSearchOptions
 		return nil, err
 	}
 
-	var resp *ResponseData
+	var resp *RealtimeResponseData
 	if _, err := s.client.Do(ctx, req, &resp); err != nil {
 		return nil, err
 	}
 
-	if reflect.ValueOf(resp.Message).Kind() == reflect.String {
-		return nil, errors.New(resp.Message.(string))
+	if len(resp.Message) > 0 {
+		return nil, errors.New(resp.Message)
 	}
 
 	return resp.ResponseData, nil
