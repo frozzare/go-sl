@@ -108,7 +108,7 @@ type TravelPlannerResponseData struct {
 // TravelPlannerService handles communication with the travel planner related
 // methods of the SL API.
 //
-// SL API docs: https://www.trafiklab.se/node/13166/documentation
+// SL API docs: https://www.trafiklab.se/node/16717/documentation
 type TravelPlannerService service
 
 // TripOptions specifies optional parameters to the TravelPlannerService.Trip.
