@@ -15,43 +15,35 @@ const realtimeEndpoint = "realtimedeparturesV4.json"
 // SL API docs: https://www.trafiklab.se/node/15754/documentation
 type RealtimeService service
 
+// Transport represents a transport type (bus, metro, ship, tram, train) struct.
+type Transport struct {
+	Destination string `json:"Destination"`
+	Deviations  []struct {
+		Consequence     string `json:"Consequence"`
+		ImportanceLevel int    `json:"ImportanceLevel"`
+		Text            string `json:"Text"`
+	} `json:"Deviations"`
+	DisplayTime          string `json:"DisplayTime"`
+	ExpectedDateTime     string `json:"ExpectedDateTime"`
+	GroupOfLine          string `json:"GroupOfLine"`
+	JourneyDirection     int    `json:"JourneyDirection"`
+	JourneyNumber        int    `json:"JourneyNumber"`
+	LineNumber           string `json:"LineNumber"`
+	StopAreaName         string `json:"StopAreaName"`
+	StopAreaNumber       int    `json:"StopAreaNumber"`
+	StopPointDesignation string `json:"StopPointDesignation"`
+	StopPointNumber      int    `json:"StopPointNumber"`
+	TimeTabledDateTime   string `json:"TimeTabledDateTime"`
+	TransportMode        string `json:"TransportMode"`
+}
+
 // RealtimeResponse represents the realtime response from SL.
 type RealtimeResponse struct {
-	Buses []struct {
-		Destination          string      `json:"Destination"`
-		Deviations           interface{} `json:"Deviations"`
-		DisplayTime          string      `json:"DisplayTime"`
-		ExpectedDateTime     string      `json:"ExpectedDateTime"`
-		GroupOfLine          interface{} `json:"GroupOfLine"`
-		JourneyDirection     int         `json:"JourneyDirection"`
-		JourneyNumber        int         `json:"JourneyNumber"`
-		LineNumber           string      `json:"LineNumber"`
-		StopAreaName         string      `json:"StopAreaName"`
-		StopAreaNumber       int         `json:"StopAreaNumber"`
-		StopPointDesignation string      `json:"StopPointDesignation"`
-		StopPointNumber      int         `json:"StopPointNumber"`
-		TimeTabledDateTime   string      `json:"TimeTabledDateTime"`
-		TransportMode        string      `json:"TransportMode"`
-	} `json:"Buses"`
-	DataAge      int    `json:"DataAge"`
-	LatestUpdate string `json:"LatestUpdate"`
-	Metros       []struct {
-		Destination          string      `json:"Destination"`
-		Deviations           interface{} `json:"Deviations"`
-		DisplayTime          string      `json:"DisplayTime"`
-		ExpectedDateTime     string      `json:"ExpectedDateTime"`
-		GroupOfLine          string      `json:"GroupOfLine"`
-		JourneyDirection     int         `json:"JourneyDirection"`
-		JourneyNumber        int         `json:"JourneyNumber"`
-		LineNumber           string      `json:"LineNumber"`
-		StopAreaName         string      `json:"StopAreaName"`
-		StopAreaNumber       int         `json:"StopAreaNumber"`
-		StopPointDesignation string      `json:"StopPointDesignation"`
-		StopPointNumber      int         `json:"StopPointNumber"`
-		TimeTabledDateTime   string      `json:"TimeTabledDateTime"`
-		TransportMode        string      `json:"TransportMode"`
-	} `json:"Metros"`
-	Ships               []interface{} `json:"Ships"`
+	Buses               []*Transport `json:"Buses"`
+	DataAge             int          `json:"DataAge"`
+	LatestUpdate        string       `json:"LatestUpdate"`
+	Metros              []*Transport `json:"Metros"`
+	Ships               []*Transport `json:"Ships"`
 	StopPointDeviations []struct {
 		Deviation struct {
 			Consequence     interface{} `json:"Consequence"`
@@ -65,28 +57,8 @@ type RealtimeResponse struct {
 			TransportMode  string `json:"TransportMode"`
 		} `json:"StopInfo"`
 	} `json:"StopPointDeviations"`
-	Trains []struct {
-		Destination string `json:"Destination"`
-		Deviations  []struct {
-			Consequence     string `json:"Consequence"`
-			ImportanceLevel int    `json:"ImportanceLevel"`
-			Text            string `json:"Text"`
-		} `json:"Deviations"`
-		DisplayTime              string      `json:"DisplayTime"`
-		ExpectedDateTime         string      `json:"ExpectedDateTime"`
-		GroupOfLine              interface{} `json:"GroupOfLine"`
-		JourneyDirection         int         `json:"JourneyDirection"`
-		JourneyNumber            int         `json:"JourneyNumber"`
-		LineNumber               string      `json:"LineNumber"`
-		SecondaryDestinationName interface{} `json:"SecondaryDestinationName"`
-		StopAreaName             string      `json:"StopAreaName"`
-		StopAreaNumber           int         `json:"StopAreaNumber"`
-		StopPointDesignation     string      `json:"StopPointDesignation"`
-		StopPointNumber          int         `json:"StopPointNumber"`
-		TimeTabledDateTime       string      `json:"TimeTabledDateTime"`
-		TransportMode            string      `json:"TransportMode"`
-	} `json:"Trains"`
-	Trams []interface{} `json:"Trams"`
+	Trains []*Transport `json:"Trains"`
+	Trams  []*Transport `json:"Trams"`
 }
 
 // ResponseData represents the response data SL API.
