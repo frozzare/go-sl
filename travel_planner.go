@@ -95,8 +95,8 @@ type Trip struct {
 	TripID   string `json:"tripId"`
 }
 
-// TravelPlannerResponseData represents the travel planner response data SL API.
-type TravelPlannerResponseData struct {
+// TripResponseData represents the travel planner trip response data SL API.
+type TripResponseData struct {
 	ErrorCode string  `json:"errorCode"`
 	ErrorText string  `json:"errorText"`
 	Message   string  `json:"Message"`
@@ -237,7 +237,7 @@ func (s *TravelPlannerService) Trip(ctx context.Context, opt *TripOptions) ([]*T
 		return nil, err
 	}
 
-	var resp *TravelPlannerResponseData
+	var resp *TripResponseData
 	if _, err := s.client.Do(ctx, req, &resp); err != nil {
 		return nil, err
 	}
@@ -251,4 +251,113 @@ func (s *TravelPlannerService) Trip(ctx context.Context, opt *TripOptions) ([]*T
 	}
 
 	return resp.Trip, nil
+}
+
+// Journey represents a journey.
+type Journey struct {
+	ErrorCode  string `json:"errorCode"`
+	ErrorText  string `json:"errorText"`
+	Message    string `json:"Message"`
+	Directions struct {
+		Direction []struct {
+			RouteIdxFrom int    `json:"routeIdxFrom"`
+			RouteIdxTo   int    `json:"routeIdxTo"`
+			Value        string `json:"value"`
+		} `json:"Direction"`
+	} `json:"Directions"`
+	JourneyStatus string `json:"JourneyStatus"`
+	Names         struct {
+		Name []struct {
+			Product struct {
+				Admin        string `json:"admin"`
+				CatCode      string `json:"catCode"`
+				CatIn        string `json:"catIn"`
+				CatOut       string `json:"catOut"`
+				CatOutL      string `json:"catOutL"`
+				CatOutS      string `json:"catOutS"`
+				Line         string `json:"line"`
+				Name         string `json:"name"`
+				Num          string `json:"num"`
+				Operator     string `json:"operator"`
+				OperatorCode string `json:"operatorCode"`
+			} `json:"Product"`
+			Category     string `json:"category"`
+			Name         string `json:"name"`
+			Number       string `json:"number"`
+			RouteIdxFrom int    `json:"routeIdxFrom"`
+			RouteIdxTo   int    `json:"routeIdxTo"`
+		} `json:"Name"`
+	} `json:"Names"`
+	ServiceDays []struct {
+		SDaysB string `json:"sDaysB"`
+		SDaysI string `json:"sDaysI"`
+		SDaysR string `json:"sDaysR"`
+	} `json:"ServiceDays"`
+	Stops struct {
+		Stop []struct {
+			DepDate          string  `json:"depDate"`
+			DepPrognosisType string  `json:"depPrognosisType"`
+			DepTime          string  `json:"depTime"`
+			DepTrack         string  `json:"depTrack"`
+			ExtID            string  `json:"extId"`
+			HasMainMast      bool    `json:"hasMainMast"`
+			ID               string  `json:"id"`
+			Lat              float64 `json:"lat"`
+			Lon              float64 `json:"lon"`
+			MainMastExtID    string  `json:"mainMastExtId"`
+			MainMastID       string  `json:"mainMastId"`
+			Name             string  `json:"name"`
+			RouteIdx         int     `json:"routeIdx"`
+		} `json:"Stop"`
+	} `json:"Stops"`
+	LastPassRouteIdx int    `json:"lastPassRouteIdx"`
+	LastPassStopRef  int    `json:"lastPassStopRef"`
+	Ref              string `json:"ref"`
+}
+
+// JourneyOptions specifies optional parameters to the TravelPlannerService.Journey.
+type JourneyOptions struct {
+	// Trip date. Example: 2014-08-23. Default is today.
+	Date string `url:"date,omitempty"`
+
+	// The reference from Trip, see above.
+	ID string `url:"id,omitempty"`
+
+	// API Key.
+	Key string `url:"key,omitempty"`
+
+	// Indicates whether detailed routes should be calculated for the results. 0 or 1. Default is 0.
+	Poly int `url:"poly,omitempty"`
+}
+
+// Journey does a trip request to SL API and response with the journey list or a error.
+func (s *TravelPlannerService) Journey(ctx context.Context, opt *JourneyOptions) (*Journey, error) {
+	if len(opt.Key) == 0 {
+		return nil, ErrNoKey
+	}
+
+	r, err := addOptions(fmt.Sprintf(travelPlannerEndpoint, "journeydetail"), opt)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := s.client.NewRequest("GET", r, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp *Journey
+	if _, err := s.client.Do(ctx, req, &resp); err != nil {
+		return nil, err
+	}
+
+	if len(resp.ErrorText) > 0 {
+		return nil, errors.New(resp.ErrorText)
+	}
+
+	if len(resp.Message) > 0 {
+		return nil, errors.New(resp.Message)
+	}
+
+	return resp, nil
 }
