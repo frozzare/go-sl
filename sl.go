@@ -42,6 +42,7 @@ type Client struct {
 	common service
 
 	// Services used for talking to different parts of the SL API.
+	Location      *LocationService
 	Realtime      *RealtimeService
 	TravelPlanner *TravelPlannerService
 }
@@ -51,9 +52,7 @@ type service struct {
 }
 
 // NewClient returns a new SL API client. If a nil httpClient is
-// provided, http.DefaultClient will be used. To use API methods which require
-// authentication, provide an http.Client that will perform the authentication
-// for you (such as that provided by the golang.org/x/oauth2 library).
+// provided, http.DefaultClient will be used.
 func NewClient(httpClient *http.Client) *Client {
 	if httpClient == nil {
 		httpClient = http.DefaultClient
@@ -63,6 +62,7 @@ func NewClient(httpClient *http.Client) *Client {
 
 	c := &Client{client: httpClient, BaseURL: baseURL, UserAgent: userAgent}
 	c.common.client = c
+	c.Location = (*LocationService)(&c.common)
 	c.Realtime = (*RealtimeService)(&c.common)
 	c.TravelPlanner = (*TravelPlannerService)(&c.common)
 
