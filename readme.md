@@ -5,7 +5,7 @@ Go package for dealing with [sl.se](http://sl.se)'s apis.
 ## Installation
 
 ```
-$ go get -u github.com/frozzare/go-sl
+go get -u github.com/frozzare/go-sl
 ```
 
 ## APIs that are implemented
