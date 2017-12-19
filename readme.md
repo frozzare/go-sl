@@ -10,6 +10,7 @@ go get -u github.com/frozzare/go-sl
 
 ## APIs that are implemented
 
+* [Location Lookup](https://www.trafiklab.se/api/sl-platsuppslag)
 * [Realtime V4](https://www.trafiklab.se/api/sl-realtidsinformation-4)
 * [Travelplanner V3](https://www.trafiklab.se/api/sl-reseplanerare-3) (Only Trip, Journey and Reconstruction not XSD)
 
