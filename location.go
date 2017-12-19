@@ -53,7 +53,7 @@ type LocationSearchOptions struct {
 	StationsOnly bool `url:"stationsonly,omitempty"`
 }
 
-// Search does a realtime search and response with the realtime list or a error.
+// Search does a location lookup and response with the location list or a error.
 func (s *LocationService) Search(ctx context.Context, opt *LocationSearchOptions) ([]*Location, error) {
 	opt.StationsOnly = !opt.StationsOnly
 
