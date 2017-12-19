@@ -9,6 +9,10 @@ import (
 // travelPlannerEndpoint is the endpoint to the travel planner api.
 const travelPlannerEndpoint = "TravelplannerV3/%s.json"
 
+var (
+	ErrNoTripFound = errors.New("No trip found")
+)
+
 // Trip represents a trip.
 type Trip struct {
 	LegList struct {
@@ -330,7 +334,7 @@ type JourneyOptions struct {
 	Poly int `url:"poly,omitempty"`
 }
 
-// Journey does a trip request to SL API and response with the journey list or a error.
+// Journey does a journey request to SL API and response with the journey list or a error.
 func (s *TravelPlannerService) Journey(ctx context.Context, opt *JourneyOptions) (*Journey, error) {
 	if len(opt.Key) == 0 {
 		return nil, ErrNoKey
@@ -360,4 +364,55 @@ func (s *TravelPlannerService) Journey(ctx context.Context, opt *JourneyOptions)
 	}
 
 	return resp, nil
+}
+
+// ReconstructionOptions specifies optional parameters to the TravelPlannerService.Reconstruction.
+type ReconstructionOptions struct {
+	// Trip date. Example: 2014-08-23. Default is today.
+	Date string `url:"date,omitempty"`
+
+	// The value I CtxRecon as I get the response from travel.
+	Ctx string `url:"ctx,omitempty"`
+
+	// API Key.
+	Key string `url:"key,omitempty"`
+
+	// Indicates whether detailed routes should be calculated for the results. 0 or 1. Default is 0.
+	Poly int `url:"poly,omitempty"`
+}
+
+// Reconstruction does a reconstruction request to SL API and response with a trip or a error.
+func (s *TravelPlannerService) Reconstruction(ctx context.Context, opt *ReconstructionOptions) (*Trip, error) {
+	if len(opt.Key) == 0 {
+		return nil, ErrNoKey
+	}
+
+	r, err := addOptions(fmt.Sprintf(travelPlannerEndpoint, "reconstruction"), opt)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := s.client.NewRequest("GET", r, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp *TripResponseData
+	if _, err := s.client.Do(ctx, req, &resp); err != nil {
+		return nil, err
+	}
+
+	if len(resp.ErrorText) > 0 {
+		return nil, errors.New(resp.ErrorText)
+	}
+
+	if len(resp.Message) > 0 {
+		return nil, errors.New(resp.Message)
+	}
+
+	if len(resp.Trip) == 0 {
+		return nil, ErrNoTripFound
+	}
+
+	return resp.Trip[0], nil
 }

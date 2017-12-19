@@ -53,3 +53,26 @@ func TestTravelPlannerJourney(t *testing.T) {
 		t.Errorf("Expected 'Fruängen' got %s", journey.Stops.Stop[0].Name)
 	}
 }
+
+func TestTravelPlannerReconstruction(t *testing.T) {
+	client, mux, _, teardown := setupClient()
+	defer teardown()
+	mux.HandleFunc("/TravelplannerV3/reconstruction.json", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+
+		fmt.Fprint(w, `{"Trip":[{"ServiceDays":[{"planningPeriodBegin":"2017-12-17","planningPeriodEnd":"2018-01-31","sDaysR":"Mo - Fr","sDaysI":"nicht 25. Dez 2017 bis 5. Jan 2018, 31. Jan","sDaysB":"7C0003E7CF98"}],"LegList":{"Leg":[{"Origin":{"name":"Centralen (Klarabergsviad.)","type":"ST","id":"A=1@O=Centralen (Klarabergsviad.)@X=18057369@Y=59330873@U=74@L=400110537@","extId":"400110537","lon":18.057369,"lat":59.330873,"prognosisType":"PROGNOSED","time":"09:11:00","date":"2017-12-19","track":"R","rtTime":"09:12:00","rtDate":"2017-12-19","hasMainMast":true,"mainMastId":"A=1@O=Centralen (Stockholm)@X=18057657@Y=59331134@U=74@L=300101002@","mainMastExtId":"300101002"},"Destination":{"name":"Sergels torg","type":"ST","id":"A=1@O=Sergels torg@X=18062790@Y=59332985@U=74@L=400110307@","extId":"400110307","lon":18.06279,"lat":59.332985,"prognosisType":"PROGNOSED","time":"09:13:00","date":"2017-12-19","track":"M","rtTime":"09:13:00","rtDate":"2017-12-19","hasMainMast":true,"mainMastId":"A=1@O=Sergels torg (Stockholm)@X=18064327@Y=59332563@U=74@L=300101000@","mainMastExtId":"300101000"},"JourneyDetailRef":{"ref":"1|12526|0|74|19122017"},"JourneyStatus":"P","Product":{"name":"BUSS  54","num":"28891","line":"54","catOut":"BUS     ","catIn":"BUS","catCode":"3","catOutS":"BUS","catOutL":"BUSS ","operatorCode":"SL","operator":"Storstockholms Lokaltrafik","admin":"100054"},"idx":"0","name":"BUSS  54","number":"28891","category":"BUS","type":"JNY","reachable":true,"direction":"Storängsbotten"},{"Origin":{"name":"Sergels torg","type":"ST","id":"A=1@O=Sergels torg@X=18062790@Y=59332985@U=74@L=400110307@","extId":"400110307","lon":18.06279,"lat":59.332985,"time":"09:15:00","date":"2017-12-19","hasMainMast":true,"mainMastId":"A=1@O=Sergels torg (Stockholm)@X=18064327@Y=59332563@U=74@L=300101000@","mainMastExtId":"300101000"},"Destination":{"name":"Hötorget","type":"ST","id":"A=1@O=Hötorget@X=18062960@Y=59335610@U=74@L=400101111@","extId":"400101111","lon":18.06296,"lat":59.33561,"time":"09:20:00","date":"2017-12-19","hasMainMast":true,"mainMastId":"A=1@O=Kungsgatan / Sveavägen (Stockholm)@X=18063868@Y=59335529@U=74@L=300101019@","mainMastExtId":"300101019"},"GisRef":{"ref":"G|1|G@F|A=1@O=Sergels torg@X=18062790@Y=59332985@U=74@L=400110307@|A=1@O=Hötorget@X=18062960@Y=59335610@U=74@L=400101111@|19122017|91500|92000|ft|ft@0@2000@120@-1@100@1@1000@0@@@@@false@0@-1@$f@$f@$f@$f@$f@$§bt@0@2000@120@-1@100@1@1000@0@@@@@false@0@-1@$f@$f@$f@$f@$f@$§tt@0@5000@120@-1@100@1@2500@0@@@@@false@0@-1@$f@$f@$f@$f@$f@$§|"},"idx":"1","name":"","type":"WALK","duration":"PT5M","dist":398}]},"TariffResult":{"fareSetItem":[{"fareItem":[{"name":"Reskassa","desc":"Helt pris","price":3000,"cur":"SEK"},{"name":"Övriga försäljningsställen","desc":"Helt pris","price":4300,"cur":"SEK"},{"name":"Konduktör på Djurgårds- och Roslagsbanan","desc":"Helt pris","price":6000,"cur":"SEK"},{"name":"Reskassa","desc":"Reducerat pris","price":2000,"cur":"SEK"},{"name":"Övriga försäljningsställen","desc":"Reducerat pris","price":2900,"cur":"SEK"},{"name":"Konduktör på Djurgårds- och Roslagsbanan","desc":"Reducerat pris","price":4000,"cur":"SEK"}],"name":"ONEWAY","desc":"SL"}]},"idx":0,"tripId":"C-0","ctxRecon":"T$A=1@O=Centralen (Klarabergsviad.)@L=400110537@a=128@$A=1@O=Sergels torg@L=400110307@a=128@$201712190911$201712190913$        $§G@F$A=1@O=Sergels torg@L=400110307@a=128@$A=1@O=Hötorget@L=400101111@a=128@$201712190915$201712190920$$","duration":"PT9M","checksum":"076D4066_4"}]}`)
+	})
+
+	trip, err := client.TravelPlanner.Reconstruction(context.Background(), &ReconstructionOptions{
+		Key: "XXXX",
+		Ctx: "T$A=1@O=Centralen%20(Klarabergsviad.)@L=400110537@a=128@$A=1@O=Sergels%20torg@L=400110307@a=128@$201712190911$201712190913$%20$§G@F$A=1@O=Sergels%20torg@L=400110307@a=128@$A=1@O=Hötorget%20(Stockholm)@L=300109119@a=128@$201712190915$201712190921$$",
+	})
+
+	if err != nil {
+		t.Errorf("Expected nil got error: %v", err)
+	}
+
+	if trip.LegList.Leg[0].Name != "BUSS  54" {
+		t.Errorf("Expected 'BUSS  54' got %s", trip.LegList.Leg[0].Name)
+	}
+}
